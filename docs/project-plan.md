@@ -251,23 +251,25 @@ prompt that starts a session in `SESSION_PROMPT.md`. Not repeated here.
 *Overwritten every session (`CLAUDE.md` section 12). Under 25 lines. History lives
 in commits, `docs/adr/` and `docs/audit/`.*
 
-**As of 2026-10-04.** Phases 0-4 done. Phase 5 partly done: deal animation,
-dealer-turn pause, animated numbers and split auto-scroll built; hole-card flip
-and chip movement not built (audit U2). Phase 6 (Sound) not started.
+**As of 2026-10-04 (after S0).** Phases 0-4 done. Phase 5 partly done (hole-card
+flip and chip movement missing, audit U2). Phase 6 (Sound) not started.
 
-Process set up: `CONSTRAINTS.md`, architecture test, ADRs 0001-0008,
-`SESSION_PROMPT.md`, audit `docs/audit/2026-10-04-audit.md`, session reports
-in `docs/reports/` pasted into the advisor chat (`docs/ADVISOR.md`).
+**Done in S0 (no app code):** five agent skills installed (`.claude/`,
+`skills-lock.json`); whole project re-read; audit re-checked: A1, A2, R1-R3,
+U1, U2, H1, H2, K1 still hold, H3 partly fixed, H4 fixed. 19 findings added
+(A3-A8, R4-R6, U3-U10, H5, H6). Report: `docs/reports/2026-10-04-S0.md`.
 
-**Next scope:** **S0**: install the skills, read the whole project, confirm or
-extend the audit (no app code). Then **S1**: fix audit A1 (In-Play can go
-negative, then Leave Table fails) and A2 (settlement timer survives leaving),
-gate the dev Reset button (H1). Then S2, S2b, S3, S4, S5 in that order; all
-ready-made in `SESSION_PROMPT.md`.
+**New blocker A3:** the iOS back swipe or Android back button leaves the table
+without cashing out; a second Buy-in then orphans the first session's chips.
+
+**Next scope:** **S1** (A1, A2, H1); S0 proposes adding A5, A6 and R6 to it.
+Then the proposed **S1b** (A3), S2 (+R4, H6), S2b, S3 (+U3, U4, H5), S4, S5.
+The advisor confirms the changes.
 
 **Decided 2026-10-04 (ADR-0008):** split 21 pays 1:1; leaving during the
-dealer's turn settles first; insurance built properly; Phase 5 gets the flip
-and chip movement.
+dealer's turn settles first; insurance built properly; flip and chip movement.
 
-**Waiting on Thach:** Phase 8 distribution goal (portfolio video only, or
-TestFlight for friends).
+**Waiting on Thach:** A4 (app killed mid-session: resume or cash out), A7 (how
+a broke player gets chips), R4 (3:2 rounding on odd bets), R5 (dealer draws
+after a player bust?), U5 (overlap on 2 cards?), U6 (hole card left or right,
+before S4), U8 (bet step); Phase 8 distribution goal.
