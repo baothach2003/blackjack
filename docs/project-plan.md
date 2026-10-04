@@ -255,14 +255,15 @@ in commits, `docs/adr/` and `docs/audit/`.*
 dealer-turn pause, animated numbers and split auto-scroll built; hole-card flip
 and chip movement not built (audit U2). Phase 6 (Sound) not started.
 
-Process set up: `CONSTRAINTS.md`, architecture test, `docs/adr/` (0001-0008),
-`SESSION_PROMPT.md`, first audit `docs/audit/2026-10-04-audit.md`.
-Checks at setup: tsc 0 errors, ESLint 0 warnings, Jest all passing.
+Process set up: `CONSTRAINTS.md`, architecture test, ADRs 0001-0008,
+`SESSION_PROMPT.md`, audit `docs/audit/2026-10-04-audit.md`, session reports
+in `docs/reports/` pasted into the advisor chat (`docs/ADVISOR.md`).
 
-**Next scope:** S0 (install skills, optional) then **S1**: fix audit A1 (In-Play
-can go negative, then Leave Table fails) and A2 (settlement timer survives
-leaving), gate the dev Reset button (H1). Then S2, S2b, S3, S4, S5 in that
-order; all ready-made in `SESSION_PROMPT.md`.
+**Next scope:** **S0**: install the skills, read the whole project, confirm or
+extend the audit (no app code). Then **S1**: fix audit A1 (In-Play can go
+negative, then Leave Table fails) and A2 (settlement timer survives leaving),
+gate the dev Reset button (H1). Then S2, S2b, S3, S4, S5 in that order; all
+ready-made in `SESSION_PROMPT.md`.
 
 **Decided 2026-10-04 (ADR-0008):** split 21 pays 1:1; leaving during the
 dealer's turn settles first; insurance built properly; Phase 5 gets the flip

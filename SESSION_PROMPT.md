@@ -1,9 +1,9 @@
 # SESSION PROMPT (reusable)
 
-How to use: open a new Claude Code session in the repo root, paste everything
-between the two lines below, then replace the SCOPE block with the next one
-from "Ready-made scopes" at the bottom (or the next item in
-`docs/project-plan.md` Current Status). Change nothing else.
+How to use: open a new Claude Code session in the repo root and paste the
+short prompt the advisor chat gave you (shape in `docs/ADVISOR.md`). It
+names a scope from "Ready-made scopes" at the bottom and may add extra
+instructions. The session follows everything between the two lines below.
 
 ------------------------------------------------------------------------------
 
@@ -11,11 +11,14 @@ Before doing anything, read in this order and follow them strictly:
 1. `CLAUDE.md` (the rules of this repo; it wins over any installed skill)
 2. `docs/project-plan.md`, section "Current Status"
 3. `CONSTRAINTS.md`
-4. Every file named in the SCOPE block below, and the ADRs in `docs/adr/` it
+4. The newest report in `docs/reports/` (what the last session left)
+5. Every file named in the scope block, and the ADRs in `docs/adr/` it
    touches
 
 SCOPE OF THIS SESSION - do this and nothing more
-<<< paste one scope block here >>>
+The scope block named in the prompt, from "Ready-made scopes" below, plus
+the advisor's extra instructions. If the two conflict and the extra
+instructions do not say which wins, STOP and ask.
 
 RULES FOR THIS SESSION
 - One scope only. Finishing early is fine; starting the next scope is not.
@@ -28,28 +31,39 @@ RULES FOR THIS SESSION
 - Never claim something looks or feels right on screen. List exactly what
   Thach must check in Expo Go instead.
 
-END OF SESSION (mandatory, in this order)
-1. Run every Floor check in `CONSTRAINTS.md` and paste the real output
-   (`npx tsc --noEmit`, `npx eslint src/ --max-warnings=0`, `npx jest`,
-   the debug-leftover grep).
-2. Explain to Thach in Vietnamese, in chat: what changed, why, which
-   decisions you made alone and why. Every file, comment and commit message
-   stays in English.
-3. List what Thach must check on the device, step by step.
-4. Rewrite (overwrite, do not append) the "Current Status" section of
+END OF SESSION (mandatory, in this order; also when the session STOPS early)
+1. Run every Floor check in `CONSTRAINTS.md` (`npx tsc --noEmit`,
+   `npx eslint src/ --max-warnings=0`, `npx jest`, the debug-leftover grep).
+2. Rewrite (overwrite, do not append) the "Current Status" section of
    `docs/project-plan.md`: done this session, next scope, open questions.
    Keep it under 25 lines.
-5. Propose the exact `git add` / `git commit -m "..."` commands. Do not run
-   them, and never push.
+3. Write the session report `docs/reports/YYYY-MM-DD-<scope>.md`, following
+   the template and rules in `docs/reports/README.md` exactly: real command
+   output, decisions made alone, problems, device check list, proposed git
+   commands. The report must stand on its own; the advisor never sees this
+   chat.
+4. In chat, in Vietnamese, short: result (DONE / PARTIAL / STOPPED), what
+   changed, the problems, the decisions made alone. Every file, comment and
+   commit message stays in English.
+5. End the chat with these PowerShell commands in one code block, with the
+   real file name filled in:
+   - `code docs\reports\<file>.md` (open the report in VS Code)
+   - `Get-Content docs\reports\<file>.md -Raw | Set-Clipboard` (copy it, to
+     paste into the advisor chat)
+   - the exact `git add` (including the report) and `git commit -m "..."`
+     commands. Do not run them, and never push.
 
 ------------------------------------------------------------------------------
 
 ## Ready-made scopes
 
-### S0 - Install engineering skills (tooling only, no app code)
+### S0 - Install skills, read the whole project, re-check the audit (no app code)
 
 ```
-Install the skills listed in docs/SKILLS.md section 2. Write no app code.
+Part A: install the skills listed in docs/SKILLS.md section 2. Part B: read
+the whole project and confirm or extend the audit. Write no app code.
+
+PART A
 1. `git status` must be clean; stop if not. `node --version` must work.
 2. From the repo root, one command:
    npx skills add addyosmani/agent-skills -a claude-code --copy -y -s incremental-implementation -s test-driven-development -s debugging-and-error-recovery -s frontend-ui-engineering -s doubt-driven-development
@@ -61,7 +75,24 @@ Install the skills listed in docs/SKILLS.md section 2. Write no app code.
 4. Show evidence: `npx skills list` shows exactly the five skills; every
    `../../references/<file>.md` link in the installed SKILL.md files points to
    a file that exists; skills-lock.json exists; `npx jest` still passes.
-Commit message to propose: chore: install engineering agent skills
+
+PART B
+- Read every file under src/, app.json, package.json, the docs/ files named
+  in CLAUDE.md section 1, every ADR, and look at every PNG in
+  design/mockups/.
+- For each finding in docs/audit/2026-10-04-audit.md, confirm it against the
+  code (cite file and line) or say why it no longer holds. Reproduce A1 and
+  A2 with temporary tests if you need certainty; delete those tests before
+  the end (they belong to S1).
+- List anything the audit missed: a money, outcome or stuck-state bug; a
+  screen that differs from its mockup or from docs/blackjack-app-spec.md; a
+  rule in the code that no doc or ADR records. Triage each with CLAUDE.md
+  section 12 and add it to the audit file as a new row (new ID, never renumber).
+- If a new finding blocks, say whether it fits into S1 or needs its own
+  scope; do not fix it here.
+- Check that the order S1, S2, S2b, S3, S4, S5 still makes sense and say so
+  in the report's "Next step".
+Commit message to propose: chore: install agent skills and re-check the audit
 ```
 
 ### S1 - Fix the two blocking money bugs (audit A1, A2) and gate the dev tool (H1)

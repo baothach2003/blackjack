@@ -24,6 +24,8 @@ Where each fact lives (each fact in one file only; the others link to it):
 | `docs/design-tokens.md` | Raw design values |
 | `docs/figma-design-prompts.md` | Original design prompts (motion detail not repeated elsewhere) |
 | `SESSION_PROMPT.md` | The prompt Thach pastes to start each session |
+| `docs/reports/` | One report per session (template in its README.md) |
+| `docs/ADVISOR.md` | How the advisor chat turns a report into the next session prompt |
 
 This file (CLAUDE.md) is the condensed, always-loaded summary. If it ever
 conflicts with one of the files above, stop and reconcile with Thach, never
@@ -141,7 +143,9 @@ blackjack-app/
 │   ├── figma-design-prompts.md   # original Figma prompts — motion detail
 │   ├── SKILLS.md                 # which agent skills are installed and why
 │   ├── adr/                      # decision records (README.md indexes them)
-│   └── audit/                    # dated audit reports with triaged findings
+│   ├── audit/                    # dated audit reports with triaged findings
+│   ├── reports/                  # one report per session (README = template)
+│   └── ADVISOR.md                # the advisor chat's side of the loop
 ├── design/
 │   ├── mockups/               # PNG exports from Figma, exported names kept
 │   │                          # (Title Case with spaces): Home.png,
@@ -264,7 +268,9 @@ A scope is done when all of these hold:
    (Expo Go on iPhone; Android when available).
 7. Current Status in `docs/project-plan.md` rewritten; decisions recorded (an ADR
    for anything section 12 calls a decision).
-8. Key decisions explained to Thach in Vietnamese in chat; git commands proposed.
+8. Session report written in `docs/reports/` (template in its README.md); key
+   decisions explained to Thach in Vietnamese in chat; commands to open and copy
+   the report, and the git commands, proposed.
 
 ## 11. Commands
 
@@ -299,6 +305,9 @@ npx jest                           # all tests, incl. the architecture test (F1,
 - **Git.** Never run `git commit` or `git push`. Propose the exact `git add` and
   `git commit -m "..."` commands; Thach runs them. Commit messages: `feat:`,
   `fix:`, `test:`, `docs:`, `refactor:`, `chore:`.
+- **Report.** Every session, finished or stopped, ends with a report in
+  `docs/reports/` that stands on its own: Thach pastes it into the advisor chat,
+  which never sees the session's chat (`docs/ADVISOR.md`).
 - **Current Status stays short.** Overwrite it every session (under 25 lines).
   History goes in commits, ADRs and audit files, not in the plan.
 
