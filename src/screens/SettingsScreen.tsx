@@ -53,18 +53,19 @@ export default function SettingsScreen() {
         {/* DEV/QA-ONLY row — see gameStore.resetBalanceForTesting and
             walletRepository.resetBalanceForTesting. Exists purely so manual
             device testing doesn't burn through the starting Balance and
-            require a reinstall. Remove or gate this before Phase 8
-            (packaging) — same spirit as the Phase-3 demo harness, not meant
-            to ship. */}
-        <Pressable style={styles.row} onPress={() => void resetBalanceForTesting()}>
-          <View style={styles.devRowLeft}>
-            <View style={styles.devBadge}>
-              <Text style={styles.devBadgeText}>DEV</Text>
+            require a reinstall. It bypasses ADR-0003's three Balance write
+            paths, so it renders only in a development build (audit H1). */}
+        {__DEV__ && (
+          <Pressable style={styles.row} onPress={() => void resetBalanceForTesting()}>
+            <View style={styles.devRowLeft}>
+              <View style={styles.devBadge}>
+                <Text style={styles.devBadgeText}>DEV</Text>
+              </View>
+              <Text style={styles.rowLabel}>Reset Test Balance</Text>
             </View>
-            <Text style={styles.rowLabel}>Reset Test Balance</Text>
-          </View>
-          <Text style={styles.chevron}>›</Text>
-        </Pressable>
+            <Text style={styles.chevron}>›</Text>
+          </Pressable>
+        )}
 
         <Text style={styles.footer}>Blackjack 1.0.0</Text>
       </ScrollView>

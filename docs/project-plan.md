@@ -251,25 +251,24 @@ prompt that starts a session in `SESSION_PROMPT.md`. Not repeated here.
 *Overwritten every session (`CLAUDE.md` section 12). Under 25 lines. History lives
 in commits, `docs/adr/` and `docs/audit/`.*
 
-**As of 2026-10-04 (after S0).** Phases 0-4 done. Phase 5 partly done (hole-card
+**As of 2026-10-05 (after S1).** Phases 0-4 done. Phase 5 partly done (hole-card
 flip and chip movement missing, audit U2). Phase 6 (Sound) not started.
 
-**Done in S0 (no app code):** five agent skills installed (`.claude/`,
-`skills-lock.json`); whole project re-read; audit re-checked: A1, A2, R1-R3,
-U1, U2, H1, H2, K1 still hold, H3 partly fixed, H4 fixed. 19 findings added
-(A3-A8, R4-R6, U3-U10, H5, H6). Report: `docs/reports/2026-10-04-S0.md`.
+**Done in S1:** In-Play can no longer go negative (A1); delayed callbacks never
+touch a closed session or a newer round (A2, A6); repeated or out-of-phase taps
+have no second effect (A5, A10); bets outside 1..In-Play rejected (R6); dev
+Reset row only in development builds (H1). From the doubt review: action
+lockout after button swaps (A9), one open session at a time (A11, store side).
+Report: `docs/reports/2026-10-05-S1.md`. Device checks pending (report section 8).
 
-**New blocker A3:** the iOS back swipe or Android back button leaves the table
-without cashing out; a second Buy-in then orphans the first session's chips.
+**Decided by Thach in S1 (to be recorded in spec 5b / an ADR by the advisor):**
+actions ignored after the buttons change: 750 ms after a deal, 450 ms after a
+split, 300 ms after a hit, a hand switch or a sheet swap; a second Buy-in while
+a table is open does nothing and returns to that table.
 
-**Next scope:** **S1** (A1, A2, H1); S0 proposes adding A5, A6 and R6 to it.
-Then the proposed **S1b** (A3), S2 (+R4, H6), S2b, S3 (+U3, U4, H5), S4, S5.
-The advisor confirms the changes.
+**Next scope:** **S1b** (A3 back gesture, plus A12, A13, H8), then S2 (+R4,
+H6), S2b, S3 (+U3, U4, H5), S4, S5.
 
-**Decided 2026-10-04 (ADR-0008):** split 21 pays 1:1; leaving during the
-dealer's turn settles first; insurance built properly; flip and chip movement.
-
-**Waiting on Thach:** A4 (app killed mid-session: resume or cash out), A7 (how
-a broke player gets chips), R4 (3:2 rounding on odd bets), R5 (dealer draws
-after a player bust?), U5 (overlap on 2 cards?), U6 (hole card left or right,
-before S4), U8 (bet step); Phase 8 distribution goal.
+**Waiting on Thach:** A4 (app killed mid-session), A7 (broke player), R4, R5,
+U5, U6 (before S4), U8; Phase 8 distribution goal. ADR-0009 (bet minimum and
+step, named by the advisor) is not in the repo yet.
