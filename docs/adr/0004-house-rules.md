@@ -1,7 +1,7 @@
 # ADR-0004: House rules
 
 ## Status
-Accepted (three points still open, listed at the end)
+Accepted. Its three open points were decided in ADR-0008
 
 ## Date
 Decided during Phases 1-4 (August-September 2026); recorded 2026-10-04
@@ -36,7 +36,7 @@ as "configurable". Each was decided one at a time, as the code reached it.
 - Every rule above has a unit test in `src/game/__tests__/` or
   `src/store/__tests__/`. Changing one is a new ADR, not an edit here.
 
-## Open (need Thach's decision; audit 2026-10-04)
+## Open points (all decided 2026-10-04 in ADR-0008; kept here as the question that was asked)
 1. **A + ten after a split.** Today `resolveOutcome` treats any 2-card 21 as a
    natural blackjack, so a split hand of A+K is paid 3:2 and counted in
    "Blackjacks Hit". Casino rule: it is a plain 21, paid 1:1. (finding R1)

@@ -13,10 +13,11 @@ UX details that change often stay in `docs/blackjack-app-spec.md` section 5b.
 | [0001](0001-local-first-no-backend.md) | Local-first: on-device SQLite, no backend, no accounts | Accepted |
 | [0002](0002-layered-architecture.md) | game / storage / store / UI layers, enforced by a test | Accepted |
 | [0003](0003-balance-and-in-play.md) | Two money figures: Balance and In-Play | Accepted |
-| [0004](0004-house-rules.md) | House rules: dealer stands on soft 17, 3:2, unlimited split | Accepted (3 points open) |
+| [0004](0004-house-rules.md) | House rules: dealer stands on soft 17, 3:2, unlimited split | Accepted (open points closed by 0008) |
 | [0005](0005-settlement-feedback.md) | No result overlay: the In-Play number reports the outcome | Accepted |
 | [0006](0006-split-ui.md) | Split as an animated 4th button; split hands scroll sideways | Accepted |
 | [0007](0007-expo-sdk-54-pin.md) | Expo SDK pinned to 54 for Expo Go | Accepted |
+| [0008](0008-rule-decisions-after-audit.md) | Split 21 pays 1:1, leaving settles a decided hand, real insurance, both Phase 5 animations | Accepted |
 
 ## Template
 
