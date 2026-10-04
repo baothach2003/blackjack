@@ -191,6 +191,8 @@ See `design-tokens.md` for every raw value (hex colors, font sizes, spacing, rad
 
 ## 5b. Post-Design Decisions (confirmed after this spec was first written)
 
+Decisions with lasting weight (money model, house rules, settlement feedback, split UI, SDK pin) are also recorded with their reasons and rejected alternatives in `docs/adr/`. Where a line below and an ADR differ, the ADR is newer and wins.
+
 - **Buy-in / In-Play mechanic (Sections 1, 3.2-3.4): confirmed, keep as designed.** This is intentionally more elaborate than a simple inline bet stepper — the two-tier Balance/In-Play system is approved and should be implemented in full, including the mid-game Buy-in Sheet and "Leave The Table" cash-out.
 - **"Top Balances" leaderboard (Section 3.1): confirmed, keep as designed.** It stays cosmetic/flavor only, backed by static or seed data — not a real ranking against other users. Do not build a backend for this; see Section 4's local-only architecture in CLAUDE.md.
 - **Dealer AI rule set — `dealerHitsSoftSeventeen` default (Section 6): confirmed as `false`.** The dealer stands on soft 17 (standard Vegas Strip rule, favors the player slightly over the `true` variant). The config toggle itself (already implemented in `src/game/rules.ts`) remains a real parameter, not hardcoded — but every call site (`gameEngine.ts` and any future settings/difficulty feature) should pass `false` unless a deliberate "hard mode" variant is added later.
@@ -213,14 +215,14 @@ See `design-tokens.md` for every raw value (hex colors, font sizes, spacing, rad
 
 ## 6. Open Questions — NOT Decided During Design
 
-These were never specified by the product owner. Do not assume the placeholder/example values below are final; treat them as illustrative only.
+These were never specified by the product owner. Do not assume the placeholder/example values below are final; treat them as illustrative only. Items struck through have since been decided; the rest are still open. New open rule questions from the 2026-10-04 audit (split A+ten payout, leaving during the dealer's turn, insurance) are listed in ADR-0004.
 
-- Maximum number of times a hand can be split (re-split limit).
-- Dealer AI rule set (e.g. does the dealer hit on a soft 17, or stand — standard house rules vary).
-- Blackjack payout ratio (mock uses an illustrative +75 vs +50 base bet, implying 1.5:1, but this was never confirmed).
+- ~~Maximum number of times a hand can be split (re-split limit).~~ **Decided: unlimited** (section 5b, ADR-0004).
+- ~~Dealer AI rule set (e.g. does the dealer hit on a soft 17, or stand — standard house rules vary).~~ **Decided: stands on soft 17** (section 5b, ADR-0004).
+- ~~Blackjack payout ratio (mock uses an illustrative +75 vs +50 base bet, implying 1.5:1, but this was never confirmed).~~ **Decided: 3:2** (section 5b, ADR-0004).
 - Double Down's visual treatment — showing the bet amount increasing (e.g. "50 → 100") was discussed as a possible idea but explicitly de-scoped ("ignore this") by the product owner; no design exists for it.
-- Exact settlement timing/animation for chip amounts changing (In-Play going up/down) after a round resolves.
-- "Top Balances" leaderboard data source/scope (global all-time? weekly? real other users or seed data?).
+- ~~Exact settlement timing/animation for chip amounts changing (In-Play going up/down) after a round resolves.~~ **Decided:** ADR-0005.
+- ~~"Top Balances" leaderboard data source/scope (global all-time? weekly? real other users or seed data?).~~ **Decided: static seed data, cosmetic** (section 5b, ADR-0001).
 - Real app name (currently placeholder "Blackjack" is used as both the in-app title and the Settings footer app name).
 - Rank ladder naming/progression (placeholder "Rookie" used once, replacing the poker reference's "Fish").
 - "Hand rankings" content (row exists in Settings, no screen designed).

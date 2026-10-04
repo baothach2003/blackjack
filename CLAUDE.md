@@ -11,15 +11,24 @@ production quality, not a throwaway demo.
 **No multiplayer, no real money, no login/cloud account.** These are permanently
 out of scope, not deferred — see section 3 for what that means for architecture.
 
-Full rules and scoring logic: `docs/blackjack-game-logic.md`. Full phase-by-phase plan:
-`docs/project-plan.md`. Full screen-by-screen UX behavior: `docs/blackjack-app-spec.md`
-Original per-screen design generation prompts (useful for animation/motion
-detail not always repeated elsewhere): `docs/figma-design-prompts.md`.
-(source of truth for what each screen does, not just what it looks like — read this
-before implementing any screen). Raw design values: `docs/design-tokens.md`. This file
-(CLAUDE.md) is the condensed, always-loaded summary of the decisions in those
-documents — if something here ever conflicts with them, treat it as a signal to stop
-and reconcile, not to silently pick one.
+Where each fact lives (each fact in one file only; the others link to it):
+
+| File | Holds |
+|---|---|
+| `docs/blackjack-game-logic.md` | Rules and scoring algorithm |
+| `docs/blackjack-app-spec.md` | What each screen does (source of truth for behaviour; read before touching a screen) |
+| `docs/adr/` | Why the key decisions were made, and what was rejected (house rules: ADR-0004) |
+| `docs/project-plan.md` | Phases, Backlog, and **Current Status** (read it every session) |
+| `CONSTRAINTS.md` | The quality gates every session must pass |
+| `docs/audit/` | Audit findings, triaged |
+| `docs/design-tokens.md` | Raw design values |
+| `docs/figma-design-prompts.md` | Original design prompts (motion detail not repeated elsewhere) |
+| `SESSION_PROMPT.md` | The prompt Thach pastes to start each session |
+
+This file (CLAUDE.md) is the condensed, always-loaded summary. If it ever
+conflicts with one of the files above, stop and reconcile with Thach, never
+silently pick one. `AGENTS.md` only points here, so there is one copy of the
+rules.
 
 **Balance vs. In-Play — do not conflate these two numbers:**
 - **Balance** — the player's total wallet across the whole app, shown in headers.
@@ -61,8 +70,9 @@ import anything from `react` or `react-native`. It contains:
   settlement, handles hit/stand/double/split, calls `resolveOutcome`
 
 Every function here must be independently testable with Jest, no widget/component
-rendering involved. If a PR adds logic here and imports anything from `react-native`,
-that's a review blocker, not a style nitpick.
+rendering involved. The layer rules in 3.1-3.3 are enforced by
+`src/__tests__/architecture.test.ts` (ADR-0002): a forbidden import fails
+`npx jest`. Never relax that test to make a build pass (`CONSTRAINTS.md` F3).
 
 ### 3.2 `src/storage/` is separate from `src/game/`, also React-free where possible
 Local SQLite persistence via `expo-sqlite`. Contains:
@@ -89,10 +99,12 @@ hands (
 )
 ```
 
-Balance only changes on: Buy-in (debit Balance, credit a new session's In-Play) and
-Leave The Table (credit remaining In-Play back to Balance, close the session). Hit/
-Stand never touch Balance directly — they only affect the current session's In-Play,
-via the `hands` table.
+Balance only changes on: Buy-in (debit Balance, credit a new session's In-Play),
+mid-game re-buy (debit Balance, add to the same session's In-Play) and Leave The
+Table (credit remaining In-Play back to Balance, close the session). Hit/Stand/
+Double/Split never touch Balance directly — they only affect the current session's
+In-Play, via the `hands` table. **In-Play is never negative**: a double or split is
+allowed only if In-Play covers every chip at risk (ADR-0003).
 
 All Profile/Stats numbers (win rate, hands played, longest win streak, natural
 blackjack rate, biggest win) are **derived via SQL query from `hands`** — never
@@ -117,74 +129,48 @@ Do not add speculative abstraction layers for it — keep `gameStore.ts` talking
 
 ```
 blackjack-app/
-├── CLAUDE.md
-├── README.md
-├── app.json
-├── package.json
+├── CLAUDE.md                  # this file (AGENTS.md only points here)
+├── CONSTRAINTS.md             # quality gates, checked every session
+├── SESSION_PROMPT.md          # the prompt that starts each session
+├── README.md  app.json  package.json  tsconfig.json  eslint.config.js
 ├── docs/
-│   ├── blackjack-game-logic.md # full rules & scoring spec — source of truth
-│   ├── project-plan.md        # phase-by-phase roadmap
-│   ├── blackjack-app-spec.md  # screen-by-screen UX behavior — source of truth
-│   └── design-tokens.md       # colors, fonts, spacing — see section 6
-│   └── figma-design-prompts.md # original Figma generation prompts — motion/animation detail
+│   ├── blackjack-game-logic.md   # rules & scoring — source of truth
+│   ├── blackjack-app-spec.md     # screen behaviour — source of truth
+│   ├── project-plan.md           # phases, Backlog, Current Status
+│   ├── design-tokens.md          # colors, fonts, spacing — see section 6
+│   ├── figma-design-prompts.md   # original Figma prompts — motion detail
+│   ├── SKILLS.md                 # which agent skills are installed and why
+│   ├── adr/                      # decision records (README.md indexes them)
+│   └── audit/                    # dated audit reports with triaged findings
 ├── design/
-│   ├── mockups/                 # PNG exports from Figma "Screens" page — actual
-│   │   │                        # filenames as exported, Title Case, spaces/dashes
-│   │   │                        # kept as-is rather than forcing a rename
-│   │   ├── Home.png
-│   │   ├── Buy-in.png
-│   │   ├── Buy-in Sheet (Mid-game).png
-│   │   ├── Place Bet Sheet.png
-│   │   ├── Gameplay.png
-│   │   ├── Split Hands.png
-│   │   ├── Split Hands - 3 Hands (Scroll).png
-│   │   ├── Multi-Card Hand (Overlap).png
-│   │   ├── Hit Animation - Before.png
-│   │   ├── Hit Animation - After.png
-│   │   ├── Result - Win.png
-│   │   ├── Result - Push.png
-│   │   ├── Result - Lose.png
-│   │   ├── Result - Bust.png
-│   │   ├── Result - Blackjack.png
-│   │   ├── Profile.png           # NOT "stats.png" — see section 7, canonical name is Profile
-│   │   ├── Settings.png
-│   │   └── Shop.png
+│   ├── mockups/               # PNG exports from Figma, exported names kept
+│   │                          # (Title Case with spaces): Home.png,
+│   │                          # Buy-in.png, Gameplay.png, Profile.png,
+│   │                          # Split Hands*.png, Result - *.png (pre
+│   │                          # ADR-0005, kept for reference) ...
 │   └── figma-link.txt
-├── assets/                     # bundled into the app at build time
-│   ├── cards/                  # 52 card faces + card back, CLEAN names (2H.png,
-│   │                            # KS.png, back.png — not raw Figma export names,
-│   │                            # see section 8 for the required rename step)
-│   ├── sounds/                 # deal.mp3, win.mp3, lose.mp3, etc.
+├── assets/                    # bundled into the app at build time
+│   ├── cards/                 # 2H.png ... AS.png, TC = ten, back.png
+│   ├── sounds/                # Phase 6
 │   └── icons/
+├── scripts/rename-cards.js    # one-time Figma export -> clean card names
 ├── src/
-│   ├── game/                   # pure logic — see 3.1
-│   ├── storage/                # local persistence — see 3.2
-│   ├── store/                  # Zustand bridge — see 3.3
-│   │   └── gameStore.ts
-│   ├── components/
-│   │   ├── Card.tsx
-│   │   ├── Chip.tsx
-│   │   ├── ActionButtons.tsx
-│   │   ├── DealerArea.tsx
-│   │   ├── PlayerHand.tsx
-│   │   └── ResultOverlay.tsx
-│   ├── screens/
-│   │   ├── HomeScreen.tsx
-│   │   ├── BuyInScreen.tsx
-│   │   ├── GameplayScreen.tsx    # includes Buy-in Sheet (mid-game) + Place Bet Sheet
-│   │   ├── ProfileScreen.tsx     # NOT "StatsScreen" — matches design's "Profile" naming
-│   │   ├── SettingsScreen.tsx
-│   │   └── ShopScreen.tsx
-│   └── hooks/
-│       └── useGameState.ts
-└── .github/
-    └── workflows/
-        └── ci.yml              # lint + test on every PR
+│   ├── __tests__/architecture.test.ts   # enforces the layer rules
+│   ├── game/                  # pure logic — 3.1
+│   ├── storage/               # SQLite repositories — 3.2
+│   ├── store/gameStore.ts     # the only bridge — 3.3
+│   ├── theme/tokens.ts        # design tokens as constants
+│   ├── components/            # ActionButtons, AnimatedNumber, Card, Chip,
+│   │                          # DealerArea, DragSlider, PlayerHand
+│   ├── screens/               # Home, BuyIn, Gameplay (incl. Place Bet,
+│   │                          # Buy-in and Leave sheets), Profile,
+│   │                          # Settings, Shop
+│   └── navigation/            # RootNavigator + route types
+└── .github/workflows/ci.yml   # tsc + lint + jest on push to main and on PRs
 ```
 
-`docs/` and `design/` are reference material — Claude Code should read/view them,
-never treat them as buildable source. `assets/` is real app content that ships with
-the build — anything placed here must be production-quality, not a placeholder.
+`docs/` and `design/` are reference material — read/view them, never treat them
+as buildable source. `assets/` ships with the build — production quality only.
 
 ## 5. Coding conventions
 
@@ -233,24 +219,19 @@ description alone.
 |---|---|
 | HomeScreen | Balance (Hero Number), "Blackjack" CTA card, Top Balances (static/seed leaderboard, cosmetic only) |
 | BuyInScreen | Choose chip amount to bring to the table; deducts from Balance, sets In-Play |
-| GameplayScreen | Core play loop: Place Bet Sheet each round, dealer/player cards, Hit/Stand/Double/Split, Buy-in Sheet (mid-game) when In-Play hits 0, Result overlay |
-| ProfileScreen | Avatar, username, "Card backs"/"Rank progress" cards, Statistics — exactly 4 stat cards per `blackjack-app-spec.md` §3.11 and the `Profile.png` mockup: Win Rate, Biggest Win, Hands Played, Blackjacks Hit (a count, not a rate) — all queried from `handsRepository`. Note: named ProfileScreen, not StatsScreen — matches the design's bottom-nav label ("Profile") and the actual Figma frame name (`Blackjack / Profile`). `handsRepository` also exports `getLongestWinStreak`/`getNaturalBlackjackRate` (built and tested in Phase 1b) which are NOT currently rendered anywhere — live, correct, unused code, kept in case a 5th stat card is added later (see project-plan.md Backlog). Don't delete them without checking there first. |(`Blackjack / Profile`). |
+| GameplayScreen | Core play loop: Place Bet Sheet each round (with Cancel), dealer/player cards, Hit/Stand/Double plus an animated Split button (ADR-0006), Buy-in Sheet (mid-game) when In-Play hits 0, Leave Table confirmation. No result overlay: the In-Play number counts and pulses green/red (ADR-0005) |
+| ProfileScreen | Avatar, username, "Card backs"/"Rank progress" cards, Statistics — exactly 4 stat cards per `blackjack-app-spec.md` §3.11 and the `Profile.png` mockup: Win Rate, Biggest Win, Hands Played, Blackjacks Hit (a count, not a rate) — all queried from `handsRepository`. Note: named ProfileScreen, not StatsScreen — matches the design's bottom-nav label ("Profile") and the actual Figma frame name (`Blackjack / Profile`). `handsRepository` also exports `getLongestWinStreak`/`getNaturalBlackjackRate` (built and tested in Phase 1b) which are NOT currently rendered anywhere — live, correct, unused code, kept in case a 5th stat card is added later (see project-plan.md Backlog). Don't delete them without checking there first. |
 | SettingsScreen | Player name (local only — no "Sign out", this app has no accounts), sound, vibration, how to play, reset stats, restore purchases, privacy, credits |
 | ShopScreen | Chip packages (mocked IAP) |
 
-Full behavior detail (Buy-in flow, Result overlay states, Balance vs. In-Play rules)
+Full behavior detail (Buy-in flow, settlement feedback, Balance vs. In-Play rules)
 is in `docs/blackjack-app-spec.md` — this table is just an index, not the spec itself.
 
-## 8. Asset filename hygiene (required before Phase 3)
+## 8. Asset filenames
 
-Card images exported from Figma keep Figma's raw variant naming (e.g.
-`Rank=10, Suit=Clubs@3x.png`, `Rank=Back, Suit=Back@3x.png`) — commas, spaces, and an
-`@3x` suffix, unusable as clean `require()` keys in a Card lookup map. Before any
-component reads from `assets/cards/`, rename all 53 files to a clean convention:
-rank (`2`-`9`, `T` for 10, `J`, `Q`, `K`, `A`) + suit initial (`H`/`D`/`C`/`S`), e.g.
-`2H.png`, `TC.png`, `KS.png`, `AH.png`, and `back.png` for the face-down variant.
-Write this as a small one-time script (not a manual per-file rename) so it's
-reproducible if the Figma export is regenerated later.
+Card images use clean names: rank (`2`-`9`, `T` for 10, `J`, `Q`, `K`, `A`) + suit
+initial (`H`/`D`/`C`/`S`), e.g. `TC.png`, plus `back.png`. If the Figma export is
+regenerated, rerun `scripts/rename-cards.js`; never rename by hand.
 
 ## 9. What NOT to do
 
@@ -270,26 +251,68 @@ reproducible if the Figma export is regenerated later.
 - Do not commit any secret or `.env` file — this project has none and should stay
   that way given the local-only, no-backend decision.
 
-## 10. Definition of Done (per feature)
+## 10. Definition of Done (per session scope)
 
-A feature is done when:
-1. Unit tests pass for any logic touched in `src/game/` or `src/storage/`.
-2. Manually verified via Expo Go on both an iOS and an Android device (or at least
-   one of each if only one platform is available at the time).
-3. No new ESLint warnings.
-4. If it touches the `hands` table, a query confirms stats compute correctly and
-   survive an app restart.
+A scope is done when all of these hold:
+1. Only the scope's items are implemented, nothing more.
+2. Every Floor rule in `CONSTRAINTS.md` passes, with the real command output shown.
+3. Every bug fix has a regression test that failed before the fix.
+4. New logic in `src/game/`, `src/storage/` or `src/store/` has tests whose expected
+   values were worked out by hand.
+5. If it touches the `hands` table: a test shows the stats compute correctly.
+6. On-device check list given to Thach; the item stays open until he confirms
+   (Expo Go on iPhone; Android when available).
+7. Current Status in `docs/project-plan.md` rewritten; decisions recorded (an ADR
+   for anything section 12 calls a decision).
+8. Key decisions explained to Thach in Vietnamese in chat; git commands proposed.
 
 ## 11. Commands
 
 ```bash
-npm install                 # install deps
-npx expo start               # run dev server, scan QR with Expo Go
-npm test                     # run Jest unit tests
-npx eslint src/              # lint
+npm install                        # install deps
+npx expo start                     # dev server; scan the QR with Expo Go
+npx expo start -c                  # same, clearing Metro's cache
+npx tsc --noEmit                   # type check (CONSTRAINTS F4)
+npx eslint src/ --max-warnings=0   # lint (F5)
+npx jest                           # all tests, incl. the architecture test (F1, F3)
 ```
 
+## 12. How sessions work
+
+- **One scope per session**, taken from `SESSION_PROMPT.md` or Current Status.
+  Never start the next scope without Thach's approval.
+- **Test-first for bugs.** Reproduce with a failing test, fix, show it passing.
+- **Measure, don't guess.** When a fix "should work" but the device disagrees,
+  add temporary instrumentation, get real numbers from Thach's device, then fix.
+  Remove the instrumentation in the same scope (`CONSTRAINTS.md` F7).
+- **Triage.** A finding blocks further work only if it gives a wrong money amount,
+  a wrong hand outcome, or a stuck state, AND is reachable in normal play.
+  Everything else is recorded (audit file or Backlog) and scheduled.
+- **Stop and ask, never guess,** when a change needs a rule or product decision
+  not in `docs/` or `docs/adr/`, would loosen `CONSTRAINTS.md`, or grows beyond the
+  scope's files. A decision Thach makes becomes an ADR (or a section 5b line in the
+  spec if it is UX detail that changes often), in the same session.
+- **Device truth.** The agent cannot see the phone. Never claim a screen looks or
+  feels right; list what Thach must check.
+- **Language.** Explain to Thach in Vietnamese in chat. Every file, comment and
+  commit message stays in English.
+- **Git.** Never run `git commit` or `git push`. Propose the exact `git add` and
+  `git commit -m "..."` commands; Thach runs them. Commit messages: `feat:`,
+  `fix:`, `test:`, `docs:`, `refactor:`, `chore:`.
+- **Current Status stays short.** Overwrite it every session (under 25 lines).
+  History goes in commits, ADRs and audit files, not in the plan.
+
+## 13. Skills
+
+Installed skills and why: `docs/SKILLS.md`. This file wins over any skill.
+
+| Moment | Skill |
+|---|---|
+| Implementing anything | incremental-implementation + test-driven-development |
+| A test fails, or the device disagrees with the code | debugging-and-error-recovery |
+| Screens, animation, accessibility | frontend-ui-engineering |
+| Money logic (payouts, Balance/In-Play, settlement, leaving the table) or a rule change | doubt-driven-development |
+
 ---
-*This file is a living document. Update it when architecture decisions change — see
-section 3.4 for an example of a decision that was reversed and documented here rather
-than left stale.*
+*Living document. When a decision changes, write a new ADR and update this summary
+in the same session; never leave this file describing code that no longer exists.*

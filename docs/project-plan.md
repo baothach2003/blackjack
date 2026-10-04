@@ -223,10 +223,13 @@ Deliverable: a complete repo, a full README, and either a demo video/GIF or a wo
 
 ## 6. Working Principles
 
-- Every feature is built on its own branch, never pushed directly to main.
-- Every pull request needs at least one reviewer before merging; prioritize cross-review between the Frontend Dev and Game Logic Dev to keep the interface between the two layers in sync.
-- Before starting each new phase, hold a quick 10-15 minute sync to confirm the previous phase's deliverable is met, to avoid building the next phase on an unstable foundation.
-- Any idea that comes up outside the scope in section 1 goes into the Backlog, not added mid-stream.
+Solo developer (Thach) working with coding agents. How every session runs (one
+scope per session, test-first bug fixes, stop-and-ask rules, triage, who runs
+git) lives in `CLAUDE.md` section 12; the quality gates in `CONSTRAINTS.md`; the
+prompt that starts a session in `SESSION_PROMPT.md`. Not repeated here.
+
+- Any idea outside the scope in section 1 goes into the Backlog, not mid-stream.
+- A Phase is ticked done only when its Deliverable line is met on a real device.
 
 ---
 
@@ -240,3 +243,29 @@ Deliverable: a complete repo, a full README, and either a demo video/GIF or a wo
 - Real data source for "Top Balances" if the flavor leaderboard is ever upgraded beyond static/seed data.
 - A 5th Profile stat card for "Longest Win Streak" — `handsRepository.getLongestWinStreak` already exists and is tested (Phase 1b), just not currently wired to any UI, since the confirmed 4-card Profile design (blackjack-app-spec.md §3.11) doesn't include it.
 - Session resume after a full app kill mid-session — `sessionsRepository.getCurrentInPlay` has a known gap here (can't reconstruct In-Play if a re-buy happened but no hand has been played/settled since), documented but not fixed since no current feature exercises this path.
+
+---
+
+## 8. Current Status
+
+*Overwritten every session (`CLAUDE.md` section 12). Under 25 lines. History lives
+in commits, `docs/adr/` and `docs/audit/`.*
+
+**As of 2026-10-04.** Phases 0-4 done. Phase 5 partly done: deal animation,
+dealer-turn pause, animated numbers and split auto-scroll built; hole-card flip
+and chip movement not built (audit U2). Phase 6 (Sound) not started.
+
+Process set up: `CONSTRAINTS.md`, architecture test, `docs/adr/` (0001-0007),
+`SESSION_PROMPT.md`, first audit `docs/audit/2026-10-04-audit.md`.
+Checks at setup: tsc 0 errors, ESLint 0 warnings, Jest all passing.
+
+**Next scope:** S0 (install skills, optional) then **S1**: fix audit A1 (In-Play
+can go negative, then Leave Table fails) and A2 (settlement timer survives
+leaving), gate the dev Reset button (H1). Ready-made in `SESSION_PROMPT.md`.
+
+**Waiting on Thach:**
+- R1 A+ten after a split: plain 21 at 1:1, or keep 3:2?
+- R2 leaving during the dealer's turn: settle the hand first, or forfeit?
+- R3 insurance: build it properly, or remove the prompt?
+- U2 Phase 5: build the hole-card flip; chip movement build or drop?
+- Phase 8 distribution goal (portfolio video only, or TestFlight for friends).

@@ -1,10 +1,14 @@
 name: CI
 
+# Runs the CONSTRAINTS.md Floor checks. Work is pushed straight to main, so CI
+# must run on push as well as on pull requests, or it never runs at all.
 on:
+  push:
+    branches: [main]
   pull_request:
 
 jobs:
-  lint-and-test:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,8 +18,19 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm install
+      - run: npm ci
 
-      - run: npx eslint src/
+      - name: Type check (F4)
+        run: npx tsc --noEmit
 
-      - run: npm test
+      - name: Lint, zero warnings (F5)
+        run: npx eslint src/ --max-warnings=0
+
+      - name: Tests, including the architecture test (F1, F3)
+        run: npx jest
+
+      - name: No debug leftovers (F7)
+        run: |
+          if grep -rn "console\.log\|DEBUG" src/; then
+            echo "Debug leftovers found (CONSTRAINTS.md F7)"; exit 1
+          fi
